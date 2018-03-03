@@ -13,4 +13,12 @@ import label_image
 
 if __name__ == '__main__':
 
-    label_image.check()
+    top_ranks, labels, results, evaluation_time = label_image.check()
+
+    highest_rank = top_ranks[0]
+    most_relevant_value = results[highest_rank] * 100
+    most_relevant_name = labels[highest_rank]
+
+    if most_relevant_value >= 70:
+        print('\nEvaluation time: {0:.3f}s\n'.format(evaluation_time))
+        print('The entered image is "' + most_relevant_name + '"\n')

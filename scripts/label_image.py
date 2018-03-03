@@ -99,10 +99,11 @@ def check(file_name="tf_files/test-data/no-entry.jpg"):
 
   top_k = results.argsort()[-5:][::-1]
   labels = load_labels(label_file)
-  evaluation_time = format(end - start)
-  print('\nEvaluation time (1-image): {:.3f}s\n'.format(end - start))
+  evaluation_time = end - start
+  # print('\nEvaluation time (1-image): {:.3f}s\n'.format(end - start))
+  #
+  # for i in top_k:
+  #   print(labels[i], results[i])
 
-  for i in top_k:
-    print(labels[i], results[i])
-  return top_k, labels, evaluation_time
+  return top_k, labels, results, evaluation_time
 
