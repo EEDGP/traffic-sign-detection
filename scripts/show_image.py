@@ -20,7 +20,6 @@ import os
 
 from IPython.display import Image, HTML, display
 
-    
 root = "tf_files/train-data/"
 
 with open(root+"/LICENSE.txt") as f:

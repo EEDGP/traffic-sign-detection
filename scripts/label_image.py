@@ -40,16 +40,13 @@ def read_tensor_from_image_file(file_name, input_height=299, input_width=299, in
   # output_name = "normalized"
   file_reader = tf.read_file(file_name, input_name)
   if file_name.endswith(".png"):
-    image_reader = tf.image.decode_png(file_reader, channels = 3,
-                                       name='png_reader')
+    image_reader = tf.image.decode_png(file_reader, channels = 3, name='png_reader')
   elif file_name.endswith(".gif"):
-    image_reader = tf.squeeze(tf.image.decode_gif(file_reader,
-                                                  name='gif_reader'))
+    image_reader = tf.squeeze(tf.image.decode_gif(file_reader, name='gif_reader'))
   elif file_name.endswith(".bmp"):
     image_reader = tf.image.decode_bmp(file_reader, name='bmp_reader')
   else:
-    image_reader = tf.image.decode_jpeg(file_reader, channels = 3,
-                                        name='jpeg_reader')
+    image_reader = tf.image.decode_jpeg(file_reader, channels = 3, name='jpeg_reader')
   float_caster = tf.cast(image_reader, tf.float32)
   dims_expander = tf.expand_dims(float_caster, 0)
   resized = tf.image.resize_bilinear(dims_expander, [input_height, input_width])
@@ -66,7 +63,7 @@ def load_labels(label_file):
     label.append(l.rstrip())
   return label
 
-def check(file_name="tf_files/test-data/no-entry.jpg"):
+def check(file_name="tf_files/test-data/14414123198_24606fb32d.jpg"):
   # constants
   model_file = "tf_files/results/retrained_graph.pb"
   label_file = "tf_files/results/retrained_labels.txt"
@@ -92,8 +89,7 @@ def check(file_name="tf_files/test-data/no-entry.jpg"):
 
   with tf.Session(graph=graph) as sess:
     start = time.time()
-    results = sess.run(output_operation.outputs[0],
-                       {input_operation.outputs[0]: t})
+    results = sess.run(output_operation.outputs[0], {input_operation.outputs[0]: t})
     end = time.time()
   results = np.squeeze(results)
 

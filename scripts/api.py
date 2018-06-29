@@ -19,6 +19,6 @@ if __name__ == '__main__':
     most_relevant_value = results[highest_rank] * 100
     most_relevant_name = labels[highest_rank]
 
-    if most_relevant_value >= 70:
-        print('\nEvaluation time: {0:.3f}s\n'.format(evaluation_time))
-        print('The entered image is "' + most_relevant_name + '"\n')
+    # if most_relevant_value >= 70:
+    print('\nEvaluation time: {0:.3f}s\n'.format(evaluation_time))
+    print('The entered image is "' + most_relevant_name + '"\n')
