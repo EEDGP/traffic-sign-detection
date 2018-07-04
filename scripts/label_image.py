@@ -63,10 +63,10 @@ def load_labels(label_file):
     label.append(l.rstrip())
   return label
 
-def check(file_name="tf_files/test-data/14414123198_24606fb32d.jpg"):
+def check(file_name="../tf_files/test-data/14414123198_24606fb32d.jpg"):
   # constants
-  model_file = "tf_files/results/retrained_graph.pb"
-  label_file = "tf_files/results/retrained_labels.txt"
+  model_file = "../tf_files/results/retrained_graph.pb"
+  label_file = "../tf_files/results/retrained_labels.txt"
   input_height = 224
   input_width = 224
   input_mean = 128

@@ -5,6 +5,13 @@ from imutils.perspective import four_point_transform
 from imutils import contours
 import imutils
 
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ''))
+
+from api import detectTrafficSign
+
 camera = cv2.VideoCapture(0)
 
 def findTrafficSign():
@@ -13,9 +20,13 @@ def findTrafficSign():
     After blobs were found it detects the largest square blob, that must be the sign.
     '''
     # define range HSV for blue color of the traffic sign
-    lower_blue = np.array([85,100,70])
-    upper_blue = np.array([115,255,255])
-    i=0 
+    # lower_blue = np.array([85,100,70])
+    # upper_blue = np.array([115,255,255])
+    lower_red = np.array([160,20,70])
+    upper_red = np.array([190,255,255])
+
+    i = 0
+
     while True:
         # grab the current frame
         (grabbed, frame) = camera.read()
@@ -33,7 +44,7 @@ def findTrafficSign():
         # define kernel for smoothing   
         kernel = np.ones((3,3),np.uint8)
         # extract binary image with active blue regions
-        mask = cv2.inRange(hsv, lower_blue, upper_blue)
+        mask = cv2.inRange(hsv, lower_red, upper_red)
         # morphological operations
         mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
@@ -101,13 +112,25 @@ def findTrafficSign():
             else: 
                 points['yEnd'] = largestRect[3][1]
             
+            if points['xStart'] < 0:
+                points['xStart'] = 0
+            
+            if points['yStart'] < 0:
+                points['yStart'] = 0
+            
+            if points['xEnd'] < 0:
+                points['xEnd'] = 0
+            
+            if points['yEnd'] < 0:
+                points['yEnd'] = 0
             # print largestRect
             # print points
             croped = frame[points['yStart']:points['yEnd'],points['xStart']:points['xEnd']]
             
-            cv2.imwrite('croped'+str(i)+'.png', croped)
-            cv2.imshow('cropped', croped)
+            cv2.imwrite('../data/cropped'+str(i)+'.png', croped)
+            # cv2.imshow('cropped', croped)
             cv2.drawContours(frame,[largestRect],0,(0,0,255),2)
+            signName = detectTrafficSign(i)
             i+=1
         #if largestRect is not None:
             # cut and warp interesting area
@@ -120,9 +143,10 @@ def findTrafficSign():
             # detectedTrafficSign = identifyTrafficSign(warped)
             #print(detectedTrafficSign)
 
-
+            if signName == 'no sign':
             # write the description of the sign on the original image
-            # cv2.putText(frame, detectedTrafficSign, tuple(largestRect[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2)
+                signName = ''
+            cv2.putText(frame, signName, tuple(largestRect[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2)
         
         # show original image
         cv2.imshow("Original", frame)
@@ -132,63 +156,6 @@ def findTrafficSign():
             cv2.destroyAllWindows()
             print("Stop programm and close all windows")
             break
-
-def identifyTrafficSign(image):
-    '''
-    In this function we select some ROI in which we expect to have the sign parts. If the ROI has more active pixels than threshold we mark it as 1, else 0
-    After path through all four regions, we compare the tuple of ones and zeros with keys in dictionary SIGNS_LOOKUP
-    '''
-
-    # define the dictionary of signs segments so we can identify
-    # each signs on the image
-    # SIGNS_LOOKUP = {
-    #     (1, 0, 0, 1): 'Turn Right', # turnRight
-    #     (0, 0, 1, 1): 'Turn Left', # turnLeft
-    #     (0, 1, 0, 1): 'Move Straight', # moveStraight
-    #     (1, 0, 1, 1): 'Turn Back', # turnBack
-    # }
-
-    THRESHOLD = 150
-    
-    image = cv2.bitwise_not(image)
-    # (roiH, roiW) = roi.shape
-    #subHeight = thresh.shape[0]/10
-    #subWidth = thresh.shape[1]/10
-    (subHeight, subWidth) = np.divide(image.shape, 10)
-    subHeight = int(subHeight)
-    subWidth = int(subWidth)
-
-    # mark the ROIs borders on the image
-    cv2.rectangle(image, (subWidth, 4*subHeight), (3*subWidth, 9*subHeight), (0,255,0),2) # left block
-    cv2.rectangle(image, (4*subWidth, 4*subHeight), (6*subWidth, 9*subHeight), (0,255,0),2) # center block
-    cv2.rectangle(image, (7*subWidth, 4*subHeight), (9*subWidth, 9*subHeight), (0,255,0),2) # right block
-    cv2.rectangle(image, (3*subWidth, 2*subHeight), (7*subWidth, 4*subHeight), (0,255,0),2) # top block
-
-    # substract 4 ROI of the sign thresh image
-    leftBlock = image[4*subHeight:9*subHeight, subWidth:3*subWidth]
-    centerBlock = image[4*subHeight:9*subHeight, 4*subWidth:6*subWidth]
-    rightBlock = image[4*subHeight:9*subHeight, 7*subWidth:9*subWidth]
-    topBlock = image[2*subHeight:4*subHeight, 3*subWidth:7*subWidth]
-
-    # we now track the fraction of each ROI
-    leftFraction = np.sum(leftBlock)/(leftBlock.shape[0]*leftBlock.shape[1])
-    centerFraction = np.sum(centerBlock)/(centerBlock.shape[0]*centerBlock.shape[1])
-    rightFraction = np.sum(rightBlock)/(rightBlock.shape[0]*rightBlock.shape[1])
-    topFraction = np.sum(topBlock)/(topBlock.shape[0]*topBlock.shape[1])
-
-    segments = (leftFraction, centerFraction, rightFraction, topFraction)
-    segments = tuple(1 if segment > THRESHOLD else 0 for segment in segments)
-
-    cv2.imshow("Warped", image)
-
-    # if segments in SIGNS_LOOKUP:
-    #     return SIGNS_LOOKUP[segments]
-    # else:
-    #     return None
-
-
-
-
 # ====================== main function of program ========================
 def main():
     findTrafficSign()
